@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List - Novedades Nays</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-section input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-section button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .input-section button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-section button:active {
+            transform: translateY(0);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .todo-item:hover {
+            background: #f0f1f3;
+            transform: translateX(5px);
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .todo-text {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .todo-priority {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: #ffe0e0;
+            color: #c41e3a;
+        }
+
+        .priority-medium {
+            background: #fff4e0;
+            color: #ff9800;
+        }
+
+        .priority-low {
+            background: #e0f2f1;
+            color: #00897b;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .clear-all-btn {
+            width: 100%;
+            padding: 10px;
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .clear-all-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .nav-btn:hover {
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="navigateTo('todo')">📝 To-Do List</button>
+            <button class="nav-btn" onclick="navigateTo('dashboard')">📊 Dashboard</button>
+        </div>
+
+        <!-- TO-DO LIST VIEW -->
+        <div id="todo-view" style="display: block;">
+            <div class="header">
+                <h1>📝 Mi Lista de Tareas</h1>
+                <p>Novedades Nays - Gestor de Tareas</p>
+            </div>
+
+            <div class="input-section">
+                <input 
+                    type="text" 
+                    id="todoInput" 
+                    placeholder="Agregar nueva tarea..."
+                    onkeypress="if(event.key === 'Enter') addTodo()"
+                >
+                <button onclick="addTodo()">Agregar</button>
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterTodos('all')">Todas (0)</button>
+                <button class="filter-btn" onclick="filterTodos('active')">Pendientes (0)</button>
+                <button class="filter-btn" onclick="filterTodos('completed')">Completadas (0)</button>
+            </div>
+
+            <ul class="todo-list" id="todoList"></ul>
+
+            <div class="empty-state" id="emptyState">
+                <p>😴 No hay tareas aún</p>
+                <p style="font-size: 12px; margin-top: 5px;">Crea tu primera tarea para comenzar</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalTodos">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="completedTodos">0</div>
+                    <div class="stat-label">Completadas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="activeTodos">0</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+            </div>
+
+            <button class="clear-all-btn" onclick="clearCompleted()">🗑️ Limpiar Completadas</button>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard-view" style="display: none;">
+            <div class="header">
+                <h1>📊 Dashboard Ventas</h1>
+                <p>Novedades Nays - Estadísticas</p>
+            </div>
+
+            <div id="dashboardContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de almacenamiento local
+        const STORAGE_KEY = 'nays_todos';
+        const SALES_KEY = 'nays_sales';
+        let currentFilter = 'all';
+        let currentPage = 'todo';
+
+        // Cargar tareas al iniciar
+        window.addEventListener('DOMContentLoaded', function() {
+            loadTodos();
+            loadDashboard();
+        });
+
+        function navigateTo(page) {
+            currentPage = page;
+            document.getElementById('todo-view').style.display = page === 'todo' ? 'block' : 'none';
+            document.getElementById('dashboard-view').style.display = page === 'dashboard' ? 'block' : 'none';
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (page === 'dashboard') {
+                renderDashboard();
+            }
+        }
+
+        // ============ TO-DO LIST FUNCTIONS ============
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+
+            if (text === '') {
+                alert('Por favor ingresa una tarea');
+                return;
+            }
+
+            const todos = getTodos();
+            const newTodo = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                priority: 'medium',
+                createdAt: new Date().toLocaleString('es-ES')
+            };
+
+            todos.push(newTodo);
+            saveTodos(todos);
+            input.value = '';
+            loadTodos();
+        }
+
+        function getTodos() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveTodos(todos) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+        }
+
+        function loadTodos() {
+            const todos = getTodos();
+            renderTodos(todos);
+            updateStats();
+        }
+
+        function renderTodos(todos) {
+            const todoList = document.getElementById('todoList');
+            const emptyState = document.getElementById('emptyState');
+            todoList.innerHTML = '';
+
+            let filtered = todos;
+            if (currentFilter === 'active') {
+                filtered = todos.filter(t => !t.completed);
+            } else if (currentFilter === 'completed') {
+                filtered = todos.filter(t => t.completed);
+            }
+
+            if (filtered.length === 0) {
+                emptyState.style.display = 'block';
+                todoList.innerHTML = '';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            filtered.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <input 
+                        type="checkbox" 
+                        class="checkbox" 
+                        ${todo.completed ? 'checked' : ''}
+                        onchange="toggleTodo(${todo.id})"
+                    >
+                    <span class="todo-text">${escapeHtml(todo.text)}</span>
+                    <span class="todo-priority priority-${todo.priority}">⭐ ${todo.priority}</span>
+                    <button class="delete-btn" onclick="deleteTodo(${todo.id})">Eliminar</button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        function toggleTodo(id) {
+            const todos = getTodos();
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos(todos);
+                loadTodos();
+            }
+        }
+
+        function deleteTodo(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+                const todos = getTodos();
+                const filtered = todos.filter(t => t.id !== id);
+                saveTodos(filtered);
+                loadTodos();
+            }
+        }
+
+        function filterTodos(filter) {
+            currentFilter = filter;
+            const todos = getTodos();
+            renderTodos(todos);
+
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function clearCompleted() {
+            if (confirm('¿Eliminar todas las tareas completadas?')) {
+                const todos = getTodos();
+                const filtered = todos.filter(t => !t.completed);
+                saveTodos(filtered);
+                currentFilter = 'all';
+                loadTodos();
+                document.querySelectorAll('.filter-btn')[0].click();
+            }
+        }
+
+        function updateStats() {
+            const todos = getTodos();
+            const completed = todos.filter(t => t.completed).length;
+            const active = todos.length - completed;
+
+            document.getElementById('totalTodos').textContent = todos.length;
+            document.getElementById('completedTodos').textContent = completed;
+            document.getElementById('activeTodos').textContent = active;
+
+            // Actualizar filtros
+            document.querySelectorAll('.filter-btn')[0].textContent = `Todas (${todos.length})`;
+            document.querySelectorAll('.filter-btn')[1].textContent = `Pendientes (${active})`;
+            document.querySelectorAll('.filter-btn')[2].textContent = `Completadas (${completed})`;
+        }
+
+        // ============ DASHBOARD FUNCTIONS ============
+
+        function loadDashboard() {
+            const sales = getSalesData();
+            if (sales.length === 0) {
+                // Crear datos de prueba
+                const demosales = [
+                    { id: 1, cliente: 'Juan López', monto: 150, fecha: '2024-01-15', estado: 'completada' },
+                    { id: 2, cliente: 'María García', monto: 320, fecha: '2024-01-16', estado: 'completada' },
+                    { id: 3, cliente: 'Carlos Rodríguez', monto: 85, fecha: '2024-01-17', estado: 'completada' },
+                    { id: 4, cliente: 'Ana Martínez', monto: 210, fecha: '2024-01-18', estado: 'pendiente' },
+                    { id: 5, cliente: 'Pedro López', monto: 450, fecha: '2024-01-19', estado: 'completada' }
+                ];
+                saveSalesData(demosales);
+            }
+        }
+
+        function getSalesData() {
+            const data = localStorage.getItem(SALES_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveSalesData(sales) {
+            localStorage.setItem(SALES_KEY, JSON.stringify(sales));
+        }
+
+        function renderDashboard() {
+            const sales = getSalesData();
+            const totalVentas = sales.length;
+            const ventasCompletadas = sales.filter(s => s.estado === 'completada').length;
+            const ingresoTotal = sales.reduce((sum, s) => sum + s.monto, 0);
+            const ingresoPendiente = sales.filter(s => s.estado === 'pendiente').reduce((sum, s) => sum + s.monto, 0);
+            const promedio = totalVentas > 0 ? (ingresoTotal / totalVentas).toFixed(2) : 0;
+
+            let html = `
+                <div class="stats" style="margin-bottom: 25px;">
+                    <div class="stat">
+                        <div class="stat-number">$${ingresoTotal.toFixed(2)}</div>
+                        <div class="stat-label">Ingresos Totales</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">${totalVentas}</div>
+                        <div class="stat-label">Total de Ventas</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">$${promedio}</div>
+                        <div class="stat-label">Promedio</div>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h3 style="color: #333; margin-bottom: 10px; font-size: 16px;">📈 Resumen</h3>
+                    <p style="font-size: 13px; color: #666; margin: 5px 0;">✅ Completadas: <strong>${ventasCompletadas}</strong></p>
+                    <p style="font-size: 13px; color: #666; margin: 5px 0;">⏳ Pendientes: <strong>${totalVentas - ventasCompletadas}</strong></p>
+                    <p style="font-size: 13px; color: #666; margin: 5px 0;">💰 Pendiente de Pago: <strong>$${ingresoPendiente.toFixed(2)}</strong></p>
+                </div>
+
+                <h3 style="color: #333; margin: 20px 0 10px 0; font-size: 16px;">📋 Últimas Ventas</h3>
+                <div style="max-height: 300px; overflow-y: auto;">
+            `;
+
+            sales.slice().reverse().forEach(venta => {
+                const estadoClass = venta.estado === 'completada' ? 'priority-low' : 'priority-high';
+                html += `
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #667eea;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <strong style="color: #333; font-size: 14px;">${escapeHtml(venta.cliente)}</strong>
+                            <span class="todo-priority ${estadoClass}">${venta.estado}</span>
+                        </div>
+                        <p style="font-size: 12px; color: #666; margin: 3px 0;">💵 Monto: <strong>$${venta.monto.toFixed(2)}</strong></p>
+                        <p style="font-size: 12px; color: #999;">📅 ${venta.fecha}</p>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+                <button class="clear-all-btn" onclick="exportSales()" style="margin-top: 20px;">💾 Descargar Datos</button>
+            `;
+
+            document.getElementById('dashboardContent').innerHTML = html;
+        }
+
+        function exportSales() {
+            const sales = getSalesData();
+            const csv = 'Cliente,Monto,Fecha,Estado\n' + 
+                sales.map(s => `${s.cliente},${s.monto},${s.fecha},${s.estado}`).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ventas.csv';
+            a.click();
+        }
+
+        // Utilidad para escapar HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
