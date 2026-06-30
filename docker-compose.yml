@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: novedades_nays
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - nays-network
+
+  backend:
+    build: ./backend
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: novedades_nays
+      NODE_ENV: development
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+    networks:
+      - nays-network
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - nays-network
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  mysql_data:
+
+networks:
+  nays-network:
+    driver: bridge
